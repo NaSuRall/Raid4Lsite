@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ajoutez vos photos</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/" id="brand">Album Voyage</a>
+  <nav><a href="/album.html">Voir l'album</a></nav>
+</header>
+
+<main>
+  <div class="shell wide">
+    <div class="steps-wrap">
+      <div class="steps-flow-label"><span class="tag tag-neutral">Pour les voyageurs</span></div>
+      <div class="steps">
+        <div class="step is-done"><div class="badge">1</div><div class="label">Vos infos</div></div>
+        <div class="step is-now"><div class="badge">2</div><div class="label">Vos photos</div></div>
+        <div class="step"><div class="badge">3</div><div class="label">Terminé</div></div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <h1>Ajoutez vos photos</h1>
+      <p class="text-muted">Choisissez les photos de votre voyage, depuis votre téléphone ou votre ordinateur.</p>
+
+      <div class="card instructions">
+        <div class="step-row"><span class="num">1</span><span>Appuyez sur le bouton <strong>« Choisir mes photos »</strong>.</span></div>
+        <div class="step-row"><span class="num">2</span><span>Sélectionnez une ou plusieurs photos.</span></div>
+        <div class="step-row"><span class="num">3</span><span>Appuyez sur <strong>« Envoyer mes photos »</strong>.</span></div>
+      </div>
+
+      <label class="dropzone" id="dropzone" for="file-input">
+        <button type="button" class="btn btn-primary btn-block" id="choose-btn" style="margin-bottom:26px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"></path><path d="m7 8 5-5 5 5"></path><path d="M4 21h16"></path></svg>
+          Choisir mes photos
+        </button>
+        <input type="file" id="file-input" accept="image/*" multiple style="display:none;" />
+      </label>
+
+      <div class="section-heading">
+        <h4 id="pending-count">0 photo choisie</h4>
+        <button type="button" class="btn btn-ghost" id="clear-pending">Tout retirer</button>
+      </div>
+      <div class="photo-grid" id="pending-grid"></div>
+
+      <button type="button" class="btn btn-primary btn-block" id="send-btn" disabled>Envoyer mes photos</button>
+      <div id="msg"></div>
+
+      <div id="sent-section" style="margin-top:34px;display:none;">
+        <div class="section-heading">
+          <h4 id="sent-count">Déjà envoyées</h4>
+        </div>
+        <div class="photo-grid" id="sent-grid"></div>
+      </div>
+
+      <p class="text-muted" style="text-align:center;font-size:14px;margin-top:10px;">Ce n'est pas vous ? <a href="#" id="switch-link">Changer de participant</a></p>
+    </div>
+  </div>
+</main>
+
+<footer>Album Voyage</footer>
+
+<script src="/js/config.js"></script>
+<script src="/js/upload.js"></script>
+</body>
+</html>

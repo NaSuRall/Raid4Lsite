@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aperçu de l'album</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/" id="brand">Album Voyage</a>
+  <nav><a href="/album.html">Voir l'album</a></nav>
+</header>
+
+<main>
+  <div class="shell wide">
+    <div class="steps-wrap">
+      <div class="steps-flow-label"><span class="tag tag-accent">Pour l'organisateur</span></div>
+      <div class="steps">
+        <div class="step is-done"><div class="badge">1</div><div class="label">Suivi</div></div>
+        <div class="step is-now"><div class="badge">2</div><div class="label">Aperçu</div></div>
+        <div class="step"><div class="badge">3</div><div class="label">Envoyé</div></div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <h1>Ajustez le cadrage</h1>
+      <p class="text-muted" id="subtitle">Chargement...</p>
+      <div class="editor-help">
+        <strong>Composez votre album</strong>
+        <span>Choisissez une grille de 1, 4 ou 6 photos, la couleur du fond, puis ajoutez du texte, des emojis ou des petites photos. Le bouton « Espace » libère un cadre pour y placer votre texte.</span>
+      </div>
+      <div class="save-state" id="save-state" aria-live="polite"></div>
+
+      <section class="removed-photos" id="removed-photos" hidden>
+        <div class="removed-photos-head">
+          <strong>Photos retirées de l’album</strong>
+          <span class="text-muted" id="removed-count"></span>
+        </div>
+        <div class="removed-photos-grid" id="removed-photos-grid"></div>
+      </section>
+
+      <div id="cover-wrap" style="text-align:center;margin-bottom:30px;">
+        <div class="preview-cover" id="cover">
+          <img class="cover-photo" id="cover-photo" alt="" />
+          <span class="focal-dot" id="cover-dot"></span>
+          <div class="cover-text">
+            <div class="title" id="cover-title">Notre Voyage</div>
+            <div class="date" id="cover-date"></div>
+          </div>
+          <button type="button" class="photo-action cover-action" id="cover-edit" hidden>Ajuster</button>
+        </div>
+        <p class="text-muted" style="font-size:13px;">Couverture</p>
+      </div>
+
+      <div class="layout-pages" id="layout-pages"></div>
+
+      <div class="actions">
+        <a href="/admin.html" class="btn btn-secondary">Revenir en arrière</a>
+        <button class="btn btn-primary" id="generate-btn">
+          Générer le PDF
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
+        </button>
+      </div>
+      <div id="msg"></div>
+
+      <div id="generated-section" style="display:none;margin-top:30px;">
+        <div class="hr" style="height:1px;background:var(--color-divider);margin:0 0 26px;"></div>
+        <p class="text-muted" style="margin-bottom:16px;">PDF généré — jetez-y un œil avant de l'envoyer à tout le monde.</p>
+        <div class="actions" style="margin-top:0;">
+          <a href="/download/album.pdf" class="btn btn-secondary" target="_blank">Télécharger le PDF pour vérifier</a>
+          <button class="btn btn-primary" id="send-btn">
+            Envoyer à tout le monde
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
+          </button>
+        </div>
+        <div id="send-msg"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="crop-dialog" id="crop-dialog" hidden>
+  <div class="crop-dialog-backdrop" data-close-dialog></div>
+  <section class="crop-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="crop-dialog-title">
+    <div class="crop-dialog-head">
+      <div>
+        <p class="eyebrow">Réglage de la photo</p>
+        <h2 id="crop-dialog-title">Ajuster le cadrage</h2>
+      </div>
+      <button type="button" class="dialog-close" data-close-dialog aria-label="Fermer">×</button>
+    </div>
+
+    <div class="crop-stage" id="crop-stage">
+      <img id="crop-stage-photo" alt="Aperçu du cadrage" draggable="false" />
+      <span class="focal-dot" id="crop-stage-dot"></span>
+      <span class="crop-stage-help" id="crop-stage-help">Cliquez sur le sujet à garder dans le cadre</span>
+    </div>
+
+    <div class="crop-controls">
+      <div class="field">
+        <label>Format dans le cadre</label>
+        <div class="segmented" id="crop-mode">
+          <button type="button" data-mode="cover" class="is-active">Remplir le cadre</button>
+          <button type="button" data-mode="contain">Photo entière</button>
+        </div>
+      </div>
+      <div class="field zoom-field" id="zoom-field">
+        <div class="range-label"><label for="crop-zoom">Zoom</label><output id="crop-zoom-value">100 %</output></div>
+        <input type="range" id="crop-zoom" min="1" max="3" step="0.05" value="1" />
+      </div>
+    </div>
+
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-secondary" id="crop-reset">Recentrer</button>
+      <button type="button" class="btn btn-primary" id="crop-save">Enregistrer</button>
+    </div>
+    <div id="crop-msg" aria-live="polite"></div>
+  </section>
+</div>
+
+<div class="crop-dialog" id="mini-photo-dialog" hidden>
+  <div class="crop-dialog-backdrop" data-close-mini-photo></div>
+  <section class="crop-dialog-panel mini-photo-panel" role="dialog" aria-modal="true" aria-labelledby="mini-photo-title">
+    <div class="crop-dialog-head">
+      <div>
+        <p class="eyebrow">Décoration</p>
+        <h2 id="mini-photo-title">Choisissez une petite photo</h2>
+      </div>
+      <button type="button" class="dialog-close" data-close-mini-photo aria-label="Fermer">×</button>
+    </div>
+    <p class="text-muted">La photo sera ajoutée comme décoration et pourra être déplacée ou redimensionnée.</p>
+    <div class="mini-photo-grid" id="mini-photo-grid"></div>
+  </section>
+</div>
+
+<footer>Album Voyage</footer>
+
+<script src="/js/config.js"></script>
+<script src="/js/preview.js"></script>
+</body>
+</html>

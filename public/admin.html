@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Espace organisateur</title>
+<link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/" id="brand">Album Voyage</a>
+  <nav><a href="/album.html">Voir l'album</a></nav>
+</header>
+
+<main>
+  <div class="shell wide">
+    <div class="steps-wrap">
+      <div class="steps-flow-label"><span class="tag tag-accent">Pour l'organisateur</span></div>
+      <div class="steps">
+        <div class="step is-now"><div class="badge">1</div><div class="label">Suivi</div></div>
+        <div class="step"><div class="badge">2</div><div class="label">Aperçu</div></div>
+        <div class="step"><div class="badge">3</div><div class="label">Envoyé</div></div>
+      </div>
+    </div>
+
+    <div class="page-card">
+      <h1>Espace organisateur</h1>
+      <p class="text-muted">Suivez qui a déjà envoyé ses photos. Quand tout le monde a participé, créez l'album.</p>
+
+      <div class="card progress-card">
+        <div class="progress-top">
+          <span class="title" id="progress-title">0 personne sur 0 a participé</span>
+          <span class="text-muted" id="progress-pct">0 %</span>
+        </div>
+        <div class="progress-bar-track"><div class="progress-bar-fill" id="progress-fill" style="width:0%;"></div></div>
+      </div>
+
+      <div class="stat-row">
+        <div class="card stat-card"><div class="card-kicker">Photos reçues</div><div class="num" id="stat-photos">0</div></div>
+        <div class="card stat-card"><div class="card-kicker">Voyageurs</div><div class="num" id="stat-people">0</div></div>
+        <div class="card stat-card"><div class="card-kicker">En attente</div><div class="num" id="stat-pending">0</div></div>
+      </div>
+
+      <table class="table">
+        <thead><tr><th>Voyageur</th><th>Photos</th><th>Statut</th><th>Reçu le</th></tr></thead>
+        <tbody id="participants-body"></tbody>
+      </table>
+
+      <div class="field" style="margin-top:28px;">
+        <label for="title-input">Titre de l'album</label>
+        <input class="input" type="text" id="title-input" placeholder="Notre Album de Voyage" />
+      </div>
+
+      <div class="field">
+        <label>Photo de couverture <span class="text-muted" style="font-weight:400;">(optionnel)</span></label>
+        <div class="cover-picker" id="cover-picker"><p class="text-muted" style="font-size:14px;">Chargement des photos...</p></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-secondary" id="remind-btn">Relancer les absents</button>
+        <button class="btn btn-primary" id="generate-btn">
+          Créer l'album
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
+        </button>
+      </div>
+
+      <div id="msg"></div>
+      <div id="album-note"></div>
+    </div>
+  </div>
+</main>
+
+<footer>Album Voyage</footer>
+
+<script src="/js/config.js"></script>
+<script src="/js/admin.js"></script>
+</body>
+</html>
