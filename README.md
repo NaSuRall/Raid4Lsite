@@ -35,7 +35,11 @@ passe** — choix fait pour rester simple) :
    (1, 4 ou 6 photos), choisir sa couleur de fond et ouvrir **Ajuster** pour
    recentrer, zoomer ou afficher une photo entiere sans la couper. Il peut
    liberer un cadre avec le bouton **Espace**, puis y ajouter du texte, des
-   emojis ou une petite photo decorative. Les decorations se deplacent par
+   emojis ou une petite photo decorative. Un bloc de texte peut contenir un
+   titre et une description, avec choix de la police (moderne, elegante ou
+   machine a ecrire) et de la couleur, sans encadre blanc. Une image facultative
+   peut etre attachee sous le texte, avec taille et forme modulables (rectangle
+   arrondi, carre ou cercle) ; l'ensemble se deplace comme un seul bloc. Les decorations se deplacent par
    glisser-deposer et peuvent etre modifiees, redimensionnees ou supprimees.
    Une photo peut aussi etre retiree de l'album sans supprimer son fichier
    original ; elle reste disponible dans la zone **Photos retirees** pour etre
@@ -73,6 +77,38 @@ node server.js
 
 Le site est alors sur http://localhost:3000
 
+## Installation recommandée avec Docker
+
+Docker conserve la base, les photos et les fichiers générés dans un volume
+persistant. C'est la méthode la plus simple pour déployer et mettre à jour le
+site sur un serveur.
+
+```bash
+cp .env.example .env
+# Modifiez .env : domaine public, mot de passe admin et SMTP
+docker compose up -d --build
+docker compose ps
+```
+
+Le site écoute sur `http://localhost:3000`. Pour utiliser un autre port public,
+ajoutez par exemple `HOST_PORT=8080` dans `.env`. Le conteneur possède un
+healthcheck sur `/health` et redémarre automatiquement.
+
+Mise à jour :
+
+```bash
+git pull --ff-only
+docker compose up -d --build
+```
+
+Sauvegarde du volume :
+
+```bash
+docker compose exec -T album-voyage tar czf - -C /app/data . > album-data-backup.tar.gz
+```
+
+La checklist d'audit et de mise en production se trouve dans [`TODO.md`](TODO.md).
+
 ### Variables d'environnement (`.env`)
 
 | Variable | Description |
@@ -83,6 +119,11 @@ Le site est alors sur http://localhost:3000
 | `DATA_DIR` | Dossier de stockage (photos + base + fichiers generes). Par defaut `./data` |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` | Identifiants SMTP pour l'envoi d'email. Laissez vide pour desactiver l'envoi (la page `/album.html` reste utilisable sans) |
 | `FROM_NAME`, `FROM_EMAIL` | Expediteur des emails |
+| `ADMIN_USER`, `ADMIN_PASSWORD` | Protection HTTP de l'espace organisateur. Laissez le mot de passe vide uniquement en local |
+
+L'espace organisateur affiche l'état SMTP et permet d'envoyer un email de test.
+Un album n'est marqué comme envoyé que si au moins un message a réellement été
+accepté par le serveur SMTP. Les échecs temporaires sont retentés trois fois.
 
 Pour le SMTP : un compte Gmail avec un "mot de passe d'application" fonctionne
 (`SMTP_HOST=smtp.gmail.com`, `SMTP_PORT=587`), ou un service comme Brevo,

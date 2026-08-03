@@ -9,11 +9,19 @@ import { UPLOADS_DIR, THUMBS_DIR, PDF_PATH, ZIP_PATH } from '../paths.js';
 import { generateAlbumPdf } from '../services/pdfGenerator.js';
 import { generateZip } from '../services/zipGenerator.js';
 import { buildLayout, seedAutoCrop, planPageSizes, PAGE_WIDTH, PAGE_HEIGHT } from '../services/layoutPlanner.js';
-import { sendAlbumEmails, sendReminderEmails } from '../services/mailer.js';
+import {
+  getEmailStatus,
+  sendAlbumEmails,
+  sendReminderEmails,
+  sendTestEmail,
+  verifyEmailConfiguration,
+} from '../services/mailer.js';
 
 const router = Router();
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PARTICIPANT_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const ALLOWED_IMAGE_FORMATS = new Set(['jpeg', 'png', 'webp', 'heif', 'avif', 'tiff']);
 
 // ---- config ----
 router.get('/config', (req, res) => {
@@ -57,13 +65,13 @@ router.post('/register', (req, res) => {
 const storage = multer.diskStorage({
   destination(req, file, cb) {
     const participantId = req.body.participantId;
-    if (!participantId) return cb(new Error('participantId manquant'));
+    if (!PARTICIPANT_ID_RE.test(participantId || '')) return cb(new Error('Participant invalide.'));
     const dir = path.join(UPLOADS_DIR, participantId);
     fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
   filename(req, file, cb) {
-    const ext = path.extname(file.originalname) || '.jpg';
+    const ext = path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, '').slice(0, 10) || '.jpg';
     cb(null, `${crypto.randomUUID()}${ext}`);
   },
 });
@@ -80,31 +88,68 @@ const upload = multer({
 });
 
 router.post('/upload', (req, res) => {
-  upload.array('photos', 40)(req, res, (err) => {
+  upload.array('photos', 40)(req, res, async (err) => {
     if (err) {
-      return res.status(400).json({ error: err.message });
+      return res.status(400).json({ error: friendlyUploadError(err) });
     }
 
     const participantId = req.body.participantId;
     const participant = db.prepare('SELECT id FROM participants WHERE id = ?').get(participantId);
     if (!participant) {
+      await Promise.all((req.files || []).map((file) => fs.promises.rm(file.path, { force: true })));
       return res.status(400).json({ error: 'Participant inconnu. Reinscrivez-vous.' });
     }
 
     const files = req.files || [];
     const insert = db.prepare(
-      'INSERT INTO photos (id, participant_id, filename, original_name, uploaded_at) VALUES (?, ?, ?, ?, ?)'
+      'INSERT INTO photos (id, participant_id, filename, original_name, content_hash, uploaded_at) VALUES (?, ?, ?, ?, ?, ?)'
     );
 
-    const inserted = files.map((file) => {
-      const id = crypto.randomUUID();
-      insert.run(id, participantId, file.filename, file.originalname, new Date().toISOString());
-      return { id, filename: file.filename, originalName: file.originalname };
-    });
+    const inserted = [];
+    const rejected = [];
+    for (const file of files) {
+      try {
+        const metadata = await sharp(file.path, { limitInputPixels: 80_000_000 }).metadata();
+        if (!metadata.width || !metadata.height || !ALLOWED_IMAGE_FORMATS.has(metadata.format)) {
+          throw new Error('format non pris en charge');
+        }
+        const contentHash = await hashFile(file.path);
+        const duplicate = db.prepare(
+          'SELECT id FROM photos WHERE participant_id = ? AND content_hash = ?'
+        ).get(participantId, contentHash);
+        if (duplicate) {
+          await fs.promises.rm(file.path, { force: true });
+          rejected.push({ name: file.originalname, reason: 'déjà envoyée' });
+          continue;
+        }
 
-    res.json({ uploaded: inserted.length, photos: inserted });
+        const id = crypto.randomUUID();
+        insert.run(id, participantId, file.filename, file.originalname.slice(0, 255), contentHash, new Date().toISOString());
+        inserted.push({ id, filename: file.filename, originalName: file.originalname });
+      } catch (error) {
+        await fs.promises.rm(file.path, { force: true });
+        rejected.push({ name: file.originalname, reason: error.message || 'image illisible' });
+      }
+    }
+
+    if (!inserted.length && rejected.length) {
+      return res.status(400).json({ error: 'Aucune image valide à enregistrer.', rejected });
+    }
+    res.json({ uploaded: inserted.length, photos: inserted, rejected });
   });
 });
+
+function friendlyUploadError(error) {
+  if (error?.code === 'LIMIT_FILE_SIZE') return 'Une photo dépasse la taille maximale de 25 Mo.';
+  if (error?.code === 'LIMIT_FILE_COUNT') return 'Vous pouvez envoyer au maximum 40 photos à la fois.';
+  return error?.message || "L'envoi des photos a échoué.";
+}
+
+async function hashFile(filePath) {
+  const hash = crypto.createHash('sha256');
+  for await (const chunk of fs.createReadStream(filePath)) hash.update(chunk);
+  return hash.digest('hex');
+}
 
 // ---- list photos for a participant ----
 router.get('/participant/:id/photos', (req, res) => {
@@ -269,9 +314,26 @@ function sanitizeElements(elements, allowedPhotoIds = null) {
       size: cleanNumber(element.size, element.type === 'photo' ? 0.22 : 28, element.type === 'photo' ? 0.1 : 12, element.type === 'photo' ? 0.45 : 72),
     };
     if (element.type === 'text') {
-      const text = String(element.text || '').trim().slice(0, 240);
-      if (!text) return [];
-      return [{ ...base, text, color: cleanColor(element.color, '#3a2415') }];
+      const title = String(element.title || element.text || '').trim().slice(0, 120);
+      const description = String(element.description || '').trim().slice(0, 360);
+      if (!title && !description) return [];
+      const font = ['sans', 'serif', 'mono'].includes(element.font) ? element.font : 'sans';
+      const photoId = typeof element.photoId === 'string' && (!allowedPhotoIds || allowedPhotoIds.has(element.photoId))
+        ? element.photoId
+        : null;
+      const photoShape = ['rounded', 'square', 'circle'].includes(element.photoShape) ? element.photoShape : 'rounded';
+      return [{
+        ...base,
+        title,
+        description,
+        font,
+        color: cleanColor(element.color, '#3a2415'),
+        ...(photoId ? {
+          photoId,
+          photoSize: cleanNumber(element.photoSize, 0.36, 0.16, 0.68),
+          photoShape,
+        } : {}),
+      }];
     }
     if (element.type === 'emoji') {
       const text = String(element.text || '').trim().slice(0, 24);
@@ -444,7 +506,7 @@ router.post('/admin/generate', async (req, res) => {
     const pages = normalizeStoredLayout(album).pages;
     const photoIds = new Set(pages.flatMap((p) => p.photoIds).filter(Boolean));
     pages.flatMap((page) => page.elements || [])
-      .filter((element) => element.type === 'photo' && element.photoId)
+      .filter((element) => element.photoId)
       .forEach((element) => photoIds.add(element.photoId));
     if (album.cover_photo_id) photoIds.add(album.cover_photo_id);
 
@@ -491,12 +553,33 @@ router.post('/admin/send', async (req, res) => {
 
   const emailResult = await sendAlbumEmails(participants, { title: album.title, albumUrl });
 
+  if (!emailResult.configured) {
+    return res.status(503).json({ error: 'Configurez le serveur SMTP avant l’envoi.', email: emailResult });
+  }
+  if (!emailResult.sent) {
+    return res.status(502).json({ error: 'Aucun email n’a pu être envoyé. Vérifiez la configuration SMTP.', email: emailResult });
+  }
+
   const sentAt = new Date().toISOString();
   db.prepare(
     'UPDATE album SET sent_at = ?, recipient_count = ?, recipient_names = ? WHERE id = 1'
-  ).run(sentAt, participants.length, JSON.stringify(participants.map((p) => p.name)));
+  ).run(sentAt, emailResult.sent, JSON.stringify(emailResult.sentRecipients.map((p) => p.name)));
 
-  res.json({ success: true, sentAt, email: emailResult });
+  res.status(emailResult.failed ? 207 : 200).json({ success: true, sentAt, email: emailResult });
+});
+
+router.get('/admin/email-status', async (req, res) => {
+  if (req.query.verify !== 'true') return res.json(getEmailStatus());
+  res.json(await verifyEmailConfiguration());
+});
+
+router.post('/admin/email-test', async (req, res) => {
+  const to = String(req.body?.email || getEmailStatus().fromEmail || '').trim().toLowerCase();
+  if (!EMAIL_RE.test(to)) return res.status(400).json({ error: 'Indiquez une adresse email de test valide.' });
+  const result = await sendTestEmail(to);
+  if (!result.configured) return res.status(503).json({ error: 'Configuration SMTP incomplète.', ...result });
+  if (!result.sent) return res.status(502).json({ error: result.errors[0]?.error || "L'email de test a échoué.", ...result });
+  res.json(result);
 });
 
 // ---- admin: remind participants who haven't uploaded anything yet ----

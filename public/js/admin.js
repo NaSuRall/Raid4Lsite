@@ -11,6 +11,12 @@ const remindBtn = document.getElementById('remind-btn');
 const msgEl = document.getElementById('msg');
 const albumNote = document.getElementById('album-note');
 const coverPicker = document.getElementById('cover-picker');
+const emailStatusDot = document.getElementById('email-status-dot');
+const emailStatusText = document.getElementById('email-status-text');
+const emailTest = document.getElementById('email-test');
+const emailTestInput = document.getElementById('email-test-input');
+const emailTestBtn = document.getElementById('email-test-btn');
+const emailMsg = document.getElementById('email-msg');
 
 let selectedCoverId = null;
 
@@ -122,6 +128,50 @@ async function loadCoverPicker(preselectId) {
   selectCover(preselectId || null, coverPicker);
 }
 
+async function loadEmailStatus(verify = false) {
+  try {
+    const res = await fetch(`/api/admin/email-status${verify ? '?verify=true' : ''}`);
+    const data = await res.json();
+    emailStatusDot.className = `status-dot ${data.verified ? 'is-ok' : data.configured ? 'is-warning' : ''}`;
+    emailTest.hidden = !data.configured;
+    emailTestInput.value ||= data.fromEmail || '';
+    if (!data.configured) {
+      emailStatusText.textContent = 'Non configuré — renseignez SMTP_HOST et FROM_EMAIL dans .env.';
+    } else if (data.verified) {
+      emailStatusText.textContent = `Connexion vérifiée · ${data.host}:${data.port} · expéditeur ${data.fromEmail}`;
+    } else if (verify && data.error) {
+      emailStatusText.textContent = `Configuration détectée, mais connexion impossible : ${data.error}`;
+    } else {
+      emailStatusText.textContent = `Configuré · ${data.host}:${data.port} · utilisez « Tester » avant l’envoi final.`;
+    }
+  } catch {
+    emailStatusText.textContent = 'Impossible de vérifier le service email.';
+  }
+}
+
+emailTestBtn.addEventListener('click', async () => {
+  emailTestBtn.disabled = true;
+  emailMsg.innerHTML = '';
+  try {
+    const res = await fetch('/api/admin/email-test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: emailTestInput.value.trim() }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "L'email de test a échoué.");
+    emailMsg.innerHTML = '<div class="success-msg">Email de test envoyé. Vérifiez votre boîte de réception.</div>';
+    await loadEmailStatus(true);
+  } catch (err) {
+    const box = document.createElement('div');
+    box.className = 'error';
+    box.textContent = err.message;
+    emailMsg.replaceChildren(box);
+  } finally {
+    emailTestBtn.disabled = false;
+  }
+});
+
 remindBtn.addEventListener('click', async () => {
   remindBtn.disabled = true;
   const original = remindBtn.textContent;
@@ -171,4 +221,7 @@ generateBtn.addEventListener('click', async () => {
   }
 });
 
-loadStatus().then((data) => loadCoverPicker(data.album?.cover_photo_id));
+Promise.all([
+  loadStatus().then((data) => loadCoverPicker(data.album?.cover_photo_id)),
+  loadEmailStatus(),
+]);

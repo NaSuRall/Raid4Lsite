@@ -1,0 +1,27 @@
+services:
+  album-voyage:
+    build: .
+    container_name: album-voyage
+    restart: unless-stopped
+    ports:
+      - "${HOST_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATA_DIR: /app/data
+      TRIP_NAME: "${TRIP_NAME:-Notre Voyage}"
+      APP_BASE_URL: "${APP_BASE_URL:-http://localhost:3000}"
+      ADMIN_USER: "${ADMIN_USER:-admin}"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-587}"
+      SMTP_SECURE: "${SMTP_SECURE:-false}"
+      SMTP_USER: "${SMTP_USER:-}"
+      SMTP_PASS: "${SMTP_PASS:-}"
+      FROM_NAME: "${FROM_NAME:-Album Voyage}"
+      FROM_EMAIL: "${FROM_EMAIL:-}"
+    volumes:
+      - album-data:/app/data
+
+volumes:
+  album-data:

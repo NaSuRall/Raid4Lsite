@@ -21,6 +21,7 @@ db.exec(`
     participant_id TEXT NOT NULL REFERENCES participants(id),
     filename TEXT NOT NULL,
     original_name TEXT,
+    content_hash TEXT,
     uploaded_at TEXT NOT NULL,
     crop_x REAL,
     crop_y REAL,
@@ -54,6 +55,7 @@ for (const stmt of [
   'ALTER TABLE photos ADD COLUMN crop_y REAL',
   'ALTER TABLE photos ADD COLUMN crop_zoom REAL DEFAULT 1',
   "ALTER TABLE photos ADD COLUMN crop_mode TEXT DEFAULT 'cover'",
+  'ALTER TABLE photos ADD COLUMN content_hash TEXT',
   "ALTER TABLE album ADD COLUMN excluded_photo_ids TEXT DEFAULT '[]'",
 ]) {
   try {
@@ -62,5 +64,7 @@ for (const stmt of [
     // column already present
   }
 }
+
+db.exec('CREATE INDEX IF NOT EXISTS idx_photos_participant_hash ON photos(participant_id, content_hash);');
 
 export default db;

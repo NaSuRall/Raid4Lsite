@@ -31,6 +31,21 @@ const cropSave = document.getElementById('crop-save');
 const cropMsg = document.getElementById('crop-msg');
 const miniPhotoDialog = document.getElementById('mini-photo-dialog');
 const miniPhotoGrid = document.getElementById('mini-photo-grid');
+const textDialog = document.getElementById('text-dialog');
+const textDialogTitle = document.getElementById('text-dialog-title');
+const textTitleInput = document.getElementById('text-title-input');
+const textDescriptionInput = document.getElementById('text-description-input');
+const textFontInput = document.getElementById('text-font-input');
+const textColorInput = document.getElementById('text-color-input');
+const textSave = document.getElementById('text-save');
+const textMsg = document.getElementById('text-msg');
+const textImageChoose = document.getElementById('text-image-choose');
+const textImageRemove = document.getElementById('text-image-remove');
+const attachedPhotoSettings = document.getElementById('attached-photo-settings');
+const textImagePreview = document.getElementById('text-image-preview');
+const textImageSize = document.getElementById('text-image-size');
+const textImageSizeValue = document.getElementById('text-image-size-value');
+const textImageShape = document.getElementById('text-image-shape');
 
 let albumLayout = null;
 let draggedPhotoId = null;
@@ -38,6 +53,8 @@ let editingPhoto = null;
 let editorValues = null;
 let hadGeneratedPdf = false;
 let decorationPageIndex = null;
+let textEditor = null;
+let miniPhotoSelectionHandler = null;
 
 function makeId() {
   return globalThis.crypto?.randomUUID?.() || `element-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -234,7 +251,17 @@ function excludePhoto(pageIndex, slotIndex) {
   albumLayout.excludedPhotos ||= [];
   if (!albumLayout.excludedPhotos.some((item) => item.id === photo.id)) albumLayout.excludedPhotos.push(photo);
   albumLayout.pages.forEach((item) => {
-    item.elements = (item.elements || []).filter((element) => !(element.type === 'photo' && element.photoId === photo.id));
+    item.elements = (item.elements || []).flatMap((element) => {
+      if (element.type === 'photo' && element.photoId === photo.id) return [];
+      if (element.type === 'text' && element.photoId === photo.id) {
+        const cleaned = { ...element };
+        delete cleaned.photoId;
+        delete cleaned.photoSize;
+        delete cleaned.photoShape;
+        return [cleaned];
+      }
+      return [element];
+    });
   });
   if (albumLayout.cover?.id === photo.id) albumLayout.cover = null;
   renderCover();
@@ -432,17 +459,103 @@ function buildEmptyBox(page, pageIndex, slotIndex) {
 }
 
 function addText(pageIndex, position = { x: 0.5, y: 0.18 }) {
-  const text = window.prompt('Quel texte voulez-vous ajouter ?', 'Un beau souvenir…');
-  if (!text?.trim()) return;
-  const page = albumLayout.pages[pageIndex];
+  openTextEditor(pageIndex, null, position);
+}
+
+function openTextEditor(pageIndex, element = null, position = { x: 0.5, y: 0.18 }) {
+  textEditor = {
+    pageIndex,
+    element,
+    position,
+    photoId: element?.photoId || null,
+    photoSize: element?.photoSize || 0.36,
+    photoShape: element?.photoShape || 'rounded',
+  };
+  textDialogTitle.textContent = element ? 'Modifier le titre et la description' : 'Ajouter un titre et une description';
+  textTitleInput.value = element?.title || element?.text || '';
+  textDescriptionInput.value = element?.description || '';
+  textFontInput.value = element?.font || 'sans';
+  textColorInput.value = element?.color || '#3a2415';
+  textImageSize.value = textEditor.photoSize;
+  textImageShape.value = textEditor.photoShape;
+  textMsg.innerHTML = '';
+  updateTextImageControls();
+  textDialog.hidden = false;
+  document.body.classList.add('dialog-open');
+  textTitleInput.focus();
+}
+
+function updateTextImageControls() {
+  const photo = textEditor?.photoId ? flatPhotos().find((item) => item.id === textEditor.photoId) : null;
+  attachedPhotoSettings.hidden = !photo;
+  textImageRemove.hidden = !photo;
+  textImageSizeValue.textContent = `${Math.round((textEditor?.photoSize || 0.36) * 100)} %`;
+  if (photo) textImagePreview.src = `/api/thumb/${photo.id}?mode=full`;
+  else textImagePreview.removeAttribute('src');
+}
+
+function closeTextEditor() {
+  textDialog.hidden = true;
+  textEditor = null;
+  if (dialog.hidden && miniPhotoDialog.hidden) document.body.classList.remove('dialog-open');
+}
+
+textSave.addEventListener('click', () => {
+  const title = textTitleInput.value.trim();
+  const description = textDescriptionInput.value.trim();
+  if (!title && !description) {
+    textMsg.innerHTML = '<div class="error">Ajoutez au moins un titre ou une description.</div>';
+    return;
+  }
+  const page = albumLayout.pages[textEditor.pageIndex];
   page.elements ||= [];
-  page.elements.push({
-    id: makeId(), type: 'text', text: text.trim().slice(0, 240),
-    x: position.x, y: position.y, size: 28, color: '#3a2415',
-  });
+  if (textEditor.element) {
+    Object.assign(textEditor.element, {
+      title: title.slice(0, 120),
+      description: description.slice(0, 360),
+      font: textFontInput.value,
+      color: textColorInput.value,
+      photoId: textEditor.photoId,
+      photoSize: textEditor.photoSize,
+      photoShape: textEditor.photoShape,
+    });
+    delete textEditor.element.text;
+  } else {
+    page.elements.push({
+      id: makeId(), type: 'text', title: title.slice(0, 120), description: description.slice(0, 360),
+      font: textFontInput.value, color: textColorInput.value,
+      photoId: textEditor.photoId,
+      photoSize: textEditor.photoSize,
+      photoShape: textEditor.photoShape,
+      x: textEditor.position.x, y: textEditor.position.y, size: 28,
+    });
+  }
+  closeTextEditor();
   renderPages();
   persistLayout();
-}
+});
+
+textImageChoose.addEventListener('click', () => {
+  openMiniPhotoPicker(textEditor.pageIndex, (photo) => {
+    textEditor.photoId = photo.id;
+    updateTextImageControls();
+  });
+});
+
+textImageRemove.addEventListener('click', () => {
+  textEditor.photoId = null;
+  updateTextImageControls();
+});
+
+textImageSize.addEventListener('input', () => {
+  textEditor.photoSize = Number(textImageSize.value);
+  updateTextImageControls();
+});
+
+textImageShape.addEventListener('change', () => {
+  textEditor.photoShape = textImageShape.value;
+  updateTextImageControls();
+});
 
 function addEmoji(pageIndex, position = { x: 0.5, y: 0.18 }) {
   const text = window.prompt('Quel emoji voulez-vous ajouter ?', '✨');
@@ -457,8 +570,9 @@ function addEmoji(pageIndex, position = { x: 0.5, y: 0.18 }) {
   persistLayout();
 }
 
-function openMiniPhotoPicker(pageIndex) {
+function openMiniPhotoPicker(pageIndex, onSelect = null) {
   decorationPageIndex = pageIndex;
+  miniPhotoSelectionHandler = onSelect;
   miniPhotoGrid.innerHTML = '';
   const photos = [...new Map(flatPhotos().map((photo) => [photo.id, photo])).values()];
   photos.forEach((photo) => {
@@ -467,6 +581,12 @@ function openMiniPhotoPicker(pageIndex) {
     button.className = 'mini-photo-option';
     button.innerHTML = `<img src="/api/thumb/${photo.id}" alt="Photo de ${photo.participantName}" loading="lazy"><span>${photo.participantName}</span>`;
     button.addEventListener('click', () => {
+      if (miniPhotoSelectionHandler) {
+        const handler = miniPhotoSelectionHandler;
+        closeMiniPhotoPicker();
+        handler(photo);
+        return;
+      }
       const page = albumLayout.pages[decorationPageIndex];
       page.elements ||= [];
       page.elements.push({ id: makeId(), type: 'photo', photoId: photo.id, x: 0.5, y: 0.2, size: 0.22 });
@@ -483,11 +603,16 @@ function openMiniPhotoPicker(pageIndex) {
 function closeMiniPhotoPicker() {
   miniPhotoDialog.hidden = true;
   decorationPageIndex = null;
-  if (dialog.hidden) document.body.classList.remove('dialog-open');
+  miniPhotoSelectionHandler = null;
+  if (dialog.hidden && textDialog.hidden) document.body.classList.remove('dialog-open');
 }
 
 function editElement(pageIndex, element) {
   if (element.type === 'photo') return;
+  if (element.type === 'text') {
+    openTextEditor(pageIndex, element);
+    return;
+  }
   const label = element.type === 'text' ? 'Modifiez votre texte' : 'Modifiez votre emoji';
   const next = window.prompt(label, element.text);
   if (!next?.trim()) return;
@@ -526,11 +651,39 @@ function buildDecoration(element, pageIndex, stage) {
     img.alt = 'Mini-photo décorative';
     img.draggable = false;
     item.appendChild(img);
+  } else if (element.type === 'text') {
+    item.classList.add(`font-${element.font || 'sans'}`);
+    const content = document.createElement('span');
+    content.className = 'element-content';
+    content.style.color = element.color || '#3a2415';
+    const title = document.createElement('strong');
+    title.className = 'element-title';
+    title.textContent = element.title || element.text || '';
+    const description = document.createElement('span');
+    description.className = 'element-description';
+    description.textContent = element.description || '';
+    if (!title.textContent) title.hidden = true;
+    if (!description.textContent) description.hidden = true;
+    content.append(title, description);
+    if (element.photoId) {
+      const attachedPhoto = flatPhotos().find((candidate) => candidate.id === element.photoId);
+      if (attachedPhoto) {
+        const imageWrap = document.createElement('span');
+        imageWrap.className = `text-attached-photo shape-${element.photoShape || 'rounded'}`;
+        imageWrap.style.width = `${((element.photoSize || 0.36) / 0.78) * 100}%`;
+        const image = document.createElement('img');
+        image.src = `/api/thumb/${attachedPhoto.id}?mode=full`;
+        image.alt = 'Image liée au texte';
+        image.draggable = false;
+        imageWrap.appendChild(image);
+        content.appendChild(imageWrap);
+      }
+    }
+    item.appendChild(content);
   } else {
     const content = document.createElement('span');
     content.className = 'element-content';
     content.textContent = element.text;
-    if (element.type === 'text') content.style.color = element.color || '#3a2415';
     item.appendChild(content);
   }
 
@@ -821,10 +974,12 @@ cropSave.addEventListener('click', async () => {
 
 dialog.querySelectorAll('[data-close-dialog]').forEach((button) => button.addEventListener('click', closeCropEditor));
 miniPhotoDialog.querySelectorAll('[data-close-mini-photo]').forEach((button) => button.addEventListener('click', closeMiniPhotoPicker));
+textDialog.querySelectorAll('[data-close-text-dialog]').forEach((button) => button.addEventListener('click', closeTextEditor));
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return;
   if (!dialog.hidden) closeCropEditor();
   if (!miniPhotoDialog.hidden) closeMiniPhotoPicker();
+  if (!textDialog.hidden) closeTextEditor();
 });
 
 async function load() {

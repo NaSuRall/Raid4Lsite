@@ -177,17 +177,66 @@ async function drawPageElements(doc, elements, photosById) {
       if (element.type === 'text') {
         const fontSize = Math.min(72, Math.max(12, element.size || 28));
         const maxWidth = PAGE_WIDTH * 0.76;
-        doc.font('Helvetica-Bold').fontSize(fontSize);
-        const textWidth = Math.min(maxWidth, doc.widthOfString(element.text) + 20);
-        const textHeight = doc.heightOfString(element.text, { width: textWidth - 20 }) + 12;
-        doc.roundedRect(x - textWidth / 2, y - textHeight / 2, textWidth, textHeight, 8)
-          .fillOpacity(0.82).fill('#ffffff').fillOpacity(1);
-        doc.fillColor(element.color || '#3a2415').text(
-          element.text,
-          x - textWidth / 2 + 10,
-          y - textHeight / 2 + 6,
-          { width: textWidth - 20, align: 'center' }
-        );
+        const title = element.title || element.text || '';
+        const description = element.description || '';
+        const fonts = {
+          sans: { bold: 'Helvetica-Bold', regular: 'Helvetica' },
+          serif: { bold: 'Times-Bold', regular: 'Times-Roman' },
+          mono: { bold: 'Courier-Bold', regular: 'Courier' },
+        };
+        const font = fonts[element.font] || fonts.sans;
+        const descriptionSize = Math.max(10, fontSize * 0.48);
+        doc.font(font.bold).fontSize(fontSize);
+        const titleWidth = title ? doc.widthOfString(title) : 0;
+        doc.font(font.regular).fontSize(descriptionSize);
+        const descriptionWidth = description ? doc.widthOfString(description) : 0;
+        const contentWidth = Math.min(maxWidth, Math.max(120, titleWidth, descriptionWidth));
+        doc.font(font.bold).fontSize(fontSize);
+        const titleHeight = title ? doc.heightOfString(title, { width: contentWidth, align: 'center' }) : 0;
+        doc.font(font.regular).fontSize(descriptionSize);
+        const descriptionHeight = description
+          ? doc.heightOfString(description, { width: contentWidth, align: 'center', lineGap: 2 })
+          : 0;
+        const textGap = title && description ? Math.max(6, fontSize * 0.22) : 0;
+        const attachedPhoto = element.photoId ? photosById[element.photoId] : null;
+        const photoWidth = attachedPhoto
+          ? PAGE_WIDTH * Math.min(0.68, Math.max(0.16, element.photoSize || 0.36))
+          : 0;
+        const photoHeight = attachedPhoto
+          ? (element.photoShape === 'rounded' ? photoWidth * 0.7 : photoWidth)
+          : 0;
+        const photoGap = attachedPhoto ? Math.max(10, fontSize * 0.45) : 0;
+        const totalHeight = titleHeight + textGap + descriptionHeight + photoGap + photoHeight;
+        let cursorY = y - totalHeight / 2;
+        const panelWidth = Math.min(PAGE_WIDTH * 0.8, Math.max(contentWidth + 24, photoWidth + 16));
+        doc.roundedRect(x - panelWidth / 2, cursorY - 10, panelWidth, totalHeight + 20, 9)
+          .fillOpacity(0.86).fill('#ffffff').fillOpacity(1);
+        doc.fillColor(element.color || '#3a2415');
+        if (title) {
+          doc.font(font.bold).fontSize(fontSize).text(title, x - contentWidth / 2, cursorY, {
+            width: contentWidth, align: 'center', lineGap: 1,
+          });
+          cursorY += titleHeight + textGap;
+        }
+        if (description) {
+          doc.font(font.regular).fontSize(descriptionSize).text(description, x - contentWidth / 2, cursorY, {
+            width: contentWidth, align: 'center', lineGap: 2,
+          });
+          cursorY += descriptionHeight;
+        }
+        if (attachedPhoto) {
+          cursorY += photoGap;
+          const buffer = await loadBoxBuffer(attachedPhoto, photoWidth, photoHeight);
+          const photoX = x - photoWidth / 2;
+          doc.save();
+          if (element.photoShape === 'circle') {
+            doc.circle(x, cursorY + photoHeight / 2, photoWidth / 2).clip();
+          } else if (element.photoShape === 'rounded') {
+            doc.roundedRect(photoX, cursorY, photoWidth, photoHeight, Math.min(16, photoWidth * 0.06)).clip();
+          }
+          doc.image(buffer, photoX, cursorY, { width: photoWidth, height: photoHeight });
+          doc.restore();
+        }
       } else if (element.type === 'emoji') {
         await drawEmoji(doc, element);
       } else if (element.type === 'photo' && photosById[element.photoId]) {

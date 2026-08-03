@@ -41,10 +41,28 @@
         <div class="card stat-card"><div class="card-kicker">En attente</div><div class="num" id="stat-pending">0</div></div>
       </div>
 
-      <table class="table">
-        <thead><tr><th>Voyageur</th><th>Photos</th><th>Statut</th><th>Reçu le</th></tr></thead>
-        <tbody id="participants-body"></tbody>
-      </table>
+      <div class="table-scroll" role="region" aria-label="Participants" tabindex="0">
+        <table class="table">
+          <thead><tr><th>Voyageur</th><th>Photos</th><th>Statut</th><th>Reçu le</th></tr></thead>
+          <tbody id="participants-body"></tbody>
+        </table>
+      </div>
+
+      <section class="email-card" aria-labelledby="email-title">
+        <div class="email-card-copy">
+          <span class="status-dot" id="email-status-dot"></span>
+          <div>
+            <strong id="email-title">Envoi des emails</strong>
+            <p class="text-muted" id="email-status-text">Vérification de la configuration…</p>
+          </div>
+        </div>
+        <div class="email-test" id="email-test" hidden>
+          <label class="sr-only" for="email-test-input">Adresse de test</label>
+          <input class="input" type="email" id="email-test-input" placeholder="votre@email.fr" autocomplete="email" />
+          <button type="button" class="btn btn-secondary btn-small" id="email-test-btn">Tester</button>
+        </div>
+        <div id="email-msg" aria-live="polite"></div>
+      </section>
 
       <div class="field" style="margin-top:28px;">
         <label for="title-input">Titre de l'album</label>
@@ -57,8 +75,8 @@
       </div>
 
       <div class="actions">
-        <button class="btn btn-secondary" id="remind-btn">Relancer les absents</button>
-        <button class="btn btn-primary" id="generate-btn">
+        <button type="button" class="btn btn-secondary" id="remind-btn">Relancer les absents</button>
+        <button type="button" class="btn btn-primary" id="generate-btn">
           Créer l'album
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
         </button>

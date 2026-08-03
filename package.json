@@ -6,7 +6,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "check": "node --check server.js && node --check src/routes/api.js && node --check src/services/mailer.js && node --check public/js/upload.js && node --check public/js/preview.js",
+    "test": "npm run check"
   },
   "engines": {
     "node": ">=22.5.0"

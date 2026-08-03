@@ -38,7 +38,7 @@
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"></path><path d="m7 8 5-5 5 5"></path><path d="M4 21h16"></path></svg>
           Choisir mes photos
         </button>
-        <input type="file" id="file-input" accept="image/*" multiple style="display:none;" />
+        <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/avif,image/tiff" multiple hidden />
       </label>
 
       <div class="section-heading">
@@ -48,9 +48,14 @@
       <div class="photo-grid" id="pending-grid"></div>
 
       <button type="button" class="btn btn-primary btn-block" id="send-btn" disabled>Envoyer mes photos</button>
+      <div class="upload-progress" id="upload-progress" hidden aria-live="polite">
+        <div class="upload-progress-head"><span>Envoi sécurisé en cours</span><span id="upload-progress-text">0 %</span></div>
+        <div class="progress-bar-track"><div class="progress-bar-fill" id="upload-progress-bar" style="width:0%"></div></div>
+        <small>Gardez cette page ouverte jusqu’à la confirmation.</small>
+      </div>
       <div id="msg"></div>
 
-      <div id="sent-section" style="margin-top:34px;display:none;">
+      <div id="sent-section" style="margin-top:34px;" hidden>
         <div class="section-heading">
           <h4 id="sent-count">Déjà envoyées</h4>
         </div>
