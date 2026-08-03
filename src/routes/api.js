@@ -269,9 +269,26 @@ function sanitizeElements(elements, allowedPhotoIds = null) {
       size: cleanNumber(element.size, element.type === 'photo' ? 0.22 : 28, element.type === 'photo' ? 0.1 : 12, element.type === 'photo' ? 0.45 : 72),
     };
     if (element.type === 'text') {
-      const text = String(element.text || '').trim().slice(0, 240);
-      if (!text) return [];
-      return [{ ...base, text, color: cleanColor(element.color, '#3a2415') }];
+      const title = String(element.title || element.text || '').trim().slice(0, 120);
+      const description = String(element.description || '').trim().slice(0, 360);
+      if (!title && !description) return [];
+      const font = ['sans', 'serif', 'mono'].includes(element.font) ? element.font : 'sans';
+      const photoId = typeof element.photoId === 'string' && (!allowedPhotoIds || allowedPhotoIds.has(element.photoId))
+        ? element.photoId
+        : null;
+      const photoShape = ['rounded', 'square', 'circle'].includes(element.photoShape) ? element.photoShape : 'rounded';
+      return [{
+        ...base,
+        title,
+        description,
+        font,
+        color: cleanColor(element.color, '#3a2415'),
+        ...(photoId ? {
+          photoId,
+          photoSize: cleanNumber(element.photoSize, 0.36, 0.16, 0.68),
+          photoShape,
+        } : {}),
+      }];
     }
     if (element.type === 'emoji') {
       const text = String(element.text || '').trim().slice(0, 24);
@@ -444,7 +461,7 @@ router.post('/admin/generate', async (req, res) => {
     const pages = normalizeStoredLayout(album).pages;
     const photoIds = new Set(pages.flatMap((p) => p.photoIds).filter(Boolean));
     pages.flatMap((page) => page.elements || [])
-      .filter((element) => element.type === 'photo' && element.photoId)
+      .filter((element) => element.photoId)
       .forEach((element) => photoIds.add(element.photoId));
     if (album.cover_photo_id) photoIds.add(album.cover_photo_id);
 

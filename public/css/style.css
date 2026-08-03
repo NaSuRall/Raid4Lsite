@@ -419,9 +419,20 @@ main { flex: 1; display: flex; align-items: flex-start; justify-content: center;
 }
 .album-element.is-moving { opacity: 0.78; }
 .element-text .element-content {
-  display: block; padding: 0.28em 0.45em; border-radius: 0.35em; background: rgba(255, 255, 255, 0.84);
-  box-shadow: 0 2px 12px rgba(58, 36, 21, 0.14); font-weight: 800; line-height: 1.12; overflow-wrap: anywhere;
+  display: flex; flex-direction: column; align-items: center; gap: 0.32em;
+  line-height: 1.1; overflow-wrap: anywhere;
 }
+.element-text { width: 78%; }
+.element-title { display: block; font-weight: 800; line-height: 1.05; }
+.element-description { display: block; font-size: 0.48em; font-weight: 400; line-height: 1.35; white-space: pre-line; }
+.text-attached-photo { display: block; margin-top: 0.35em; overflow: hidden; flex: 0 0 auto; }
+.text-attached-photo.shape-rounded { aspect-ratio: 10 / 7; border-radius: 0.28em; }
+.text-attached-photo.shape-square, .text-attached-photo.shape-circle { aspect-ratio: 1; }
+.text-attached-photo.shape-circle { border-radius: 50%; }
+.text-attached-photo img { width: 100%; height: 100%; display: block; object-fit: cover; pointer-events: none; }
+.font-sans { font-family: Arial, Helvetica, sans-serif; }
+.font-serif { font-family: Georgia, 'Times New Roman', serif; }
+.font-mono { font-family: 'Courier New', Courier, monospace; }
 .element-emoji .element-content { display: block; line-height: 1; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.18)); }
 .element-photo { aspect-ratio: 1; padding: 0.7%; background: #fff; box-shadow: 0 4px 16px rgba(58, 36, 21, 0.24); border-radius: 3%; }
 .element-photo > img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 2%; pointer-events: none; }
@@ -441,6 +452,22 @@ main { flex: 1; display: flex; align-items: flex-start; justify-content: center;
 .mini-photo-option:hover { border-color: var(--color-accent); }
 .mini-photo-option img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .mini-photo-option span { position: absolute; left: 4px; right: 4px; bottom: 4px; padding: 3px; border-radius: 7px; background: rgba(0,0,0,.58); color: #fff; font-size: 9px; }
+.text-dialog-panel { width: min(620px, 100%); }
+.text-area { min-height: 110px; resize: vertical; border-radius: var(--radius-md); }
+.text-style-row { display: grid; grid-template-columns: 1fr 110px; gap: 16px; align-items: end; }
+.text-style-row .field { margin-bottom: 0; }
+.text-color-large { width: 100%; height: 48px; padding: 3px; border: 1px solid var(--color-divider); border-radius: var(--radius-md); background: #fff; cursor: pointer; }
+.attached-photo-editor { margin-top: 20px; padding: 14px; border: 1px solid var(--color-divider); border-radius: 14px; background: color-mix(in srgb, var(--color-neutral-200) 42%, #fff); }
+.attached-photo-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; }
+.attached-photo-head p { margin: 3px 0 0; font-size: 12px; }
+.attached-photo-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.btn-small { min-height: 34px; padding: 7px 11px; font-size: 11px; }
+.attached-photo-settings { display: grid; grid-template-columns: 120px 1fr; gap: 14px; align-items: center; margin-top: 14px; }
+.attached-photo-settings[hidden] { display: none; }
+.attached-photo-settings > img { width: 120px; aspect-ratio: 1; object-fit: cover; border-radius: 10px; background: var(--color-neutral-200); }
+.attached-photo-fields { display: grid; gap: 10px; }
+.attached-photo-fields .field { margin: 0; }
+.attached-photo-fields input[type="range"] { width: 100%; accent-color: var(--color-accent); }
 
 .segmented {
   display: inline-flex; padding: 3px; gap: 2px; border-radius: 12px; background: var(--color-neutral-200);
@@ -520,6 +547,10 @@ footer { text-align: center; color: var(--color-neutral-600); font-size: 13px; p
   .photo-action { min-height: 25px; padding: 3px 6px; font-size: 9px; }
   .empty-slot span { display: none; }
   .crop-controls { grid-template-columns: 1fr; }
+  .text-style-row { grid-template-columns: 1fr 90px; }
+  .attached-photo-head { align-items: flex-start; flex-direction: column; }
+  .attached-photo-settings { grid-template-columns: 84px 1fr; }
+  .attached-photo-settings > img { width: 84px; }
   .crop-dialog { padding: 10px; }
   .crop-dialog-panel { max-height: calc(100vh - 20px); padding: 18px; border-radius: 18px; }
   .crop-stage { max-height: 48vh; }

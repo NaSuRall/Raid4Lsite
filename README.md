@@ -35,7 +35,11 @@ passe** — choix fait pour rester simple) :
    (1, 4 ou 6 photos), choisir sa couleur de fond et ouvrir **Ajuster** pour
    recentrer, zoomer ou afficher une photo entiere sans la couper. Il peut
    liberer un cadre avec le bouton **Espace**, puis y ajouter du texte, des
-   emojis ou une petite photo decorative. Les decorations se deplacent par
+   emojis ou une petite photo decorative. Un bloc de texte peut contenir un
+   titre et une description, avec choix de la police (moderne, elegante ou
+   machine a ecrire) et de la couleur, sans encadre blanc. Une image facultative
+   peut etre attachee sous le texte, avec taille et forme modulables (rectangle
+   arrondi, carre ou cercle) ; l'ensemble se deplace comme un seul bloc. Les decorations se deplacent par
    glisser-deposer et peuvent etre modifiees, redimensionnees ou supprimees.
    Une photo peut aussi etre retiree de l'album sans supprimer son fichier
    original ; elle reste disponible dans la zone **Photos retirees** pour etre
