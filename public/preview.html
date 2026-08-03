@@ -119,6 +119,75 @@
   </section>
 </div>
 
+<div class="crop-dialog" id="text-dialog" hidden>
+  <div class="crop-dialog-backdrop" data-close-text-dialog></div>
+  <section class="crop-dialog-panel text-dialog-panel" role="dialog" aria-modal="true" aria-labelledby="text-dialog-title">
+    <div class="crop-dialog-head">
+      <div>
+        <p class="eyebrow">Bloc de texte</p>
+        <h2 id="text-dialog-title">Ajouter un titre et une description</h2>
+      </div>
+      <button type="button" class="dialog-close" data-close-text-dialog aria-label="Fermer">×</button>
+    </div>
+    <div class="field">
+      <label for="text-title-input">Titre</label>
+      <input class="input" id="text-title-input" type="text" maxlength="120" placeholder="Une journée inoubliable" />
+    </div>
+    <div class="field">
+      <label for="text-description-input">Description <span class="text-muted">(optionnelle)</span></label>
+      <textarea class="input text-area" id="text-description-input" maxlength="360" rows="4" placeholder="Racontez ce souvenir en quelques lignes…"></textarea>
+    </div>
+    <div class="text-style-row">
+      <div class="field">
+        <label for="text-font-input">Police d’écriture</label>
+        <select class="input" id="text-font-input">
+          <option value="sans">Moderne</option>
+          <option value="serif">Élégante</option>
+          <option value="mono">Machine à écrire</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="text-color-input">Couleur</label>
+        <input class="text-color-large" id="text-color-input" type="color" value="#3a2415" />
+      </div>
+    </div>
+    <div class="attached-photo-editor">
+      <div class="attached-photo-head">
+        <div>
+          <strong>Image sous le texte</strong>
+          <p class="text-muted">Facultative, elle se déplacera avec le titre et la description.</p>
+        </div>
+        <div class="attached-photo-actions">
+          <button type="button" class="btn btn-secondary btn-small" id="text-image-choose">Choisir une image</button>
+          <button type="button" class="btn btn-secondary btn-small" id="text-image-remove" hidden>Retirer</button>
+        </div>
+      </div>
+      <div class="attached-photo-settings" id="attached-photo-settings" hidden>
+        <img id="text-image-preview" alt="Image choisie sous le texte" />
+        <div class="attached-photo-fields">
+          <div class="field">
+            <div class="range-label"><label for="text-image-size">Taille de l’image</label><output id="text-image-size-value">36 %</output></div>
+            <input type="range" id="text-image-size" min="0.16" max="0.68" step="0.02" value="0.36" />
+          </div>
+          <div class="field">
+            <label for="text-image-shape">Forme</label>
+            <select class="input" id="text-image-shape">
+              <option value="rounded">Rectangle arrondi</option>
+              <option value="square">Carré</option>
+              <option value="circle">Cercle</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <button type="button" class="btn btn-secondary" data-close-text-dialog>Annuler</button>
+      <button type="button" class="btn btn-primary" id="text-save">Enregistrer le texte</button>
+    </div>
+    <div id="text-msg" aria-live="polite"></div>
+  </section>
+</div>
+
 <div class="crop-dialog" id="mini-photo-dialog" hidden>
   <div class="crop-dialog-backdrop" data-close-mini-photo></div>
   <section class="crop-dialog-panel mini-photo-panel" role="dialog" aria-modal="true" aria-labelledby="mini-photo-title">
