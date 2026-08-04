@@ -26,6 +26,6 @@ export function protectAdmin(req, res, next) {
 
   if (safeEqual(username, expectedUser) && safeEqual(password, expectedPassword)) return next();
 
-  res.set('WWW-Authenticate', 'Basic realm="Album Voyage - organisateur", charset="UTF-8"');
+  res.set('WWW-Authenticate', 'Basic realm="La traversée des Alpes RAID 2026 - organisateur", charset="UTF-8"');
   return res.status(401).send('Authentification organisateur requise.');
 }

@@ -9,7 +9,7 @@ services:
       NODE_ENV: production
       PORT: 3000
       DATA_DIR: /app/data
-      TRIP_NAME: "${TRIP_NAME:-Notre Voyage}"
+      TRIP_NAME: "${TRIP_NAME:-La traversée des Alpes RAID 2026}"
       APP_BASE_URL: "${APP_BASE_URL:-http://localhost:3000}"
       ADMIN_USER: "${ADMIN_USER:-admin}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD:-}"
@@ -18,7 +18,7 @@ services:
       SMTP_SECURE: "${SMTP_SECURE:-false}"
       SMTP_USER: "${SMTP_USER:-}"
       SMTP_PASS: "${SMTP_PASS:-}"
-      FROM_NAME: "${FROM_NAME:-Album Voyage}"
+      FROM_NAME: "${FROM_NAME:-La traversée des Alpes RAID 2026}"
       FROM_EMAIL: "${FROM_EMAIL:-}"
     volumes:
       - album-data:/app/data

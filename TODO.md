@@ -17,7 +17,7 @@
 - [x] Fournir Docker, Docker Compose, un volume persistant et un healthcheck.
 - [x] Documenter l'installation, la configuration, les sauvegardes et la vérification.
 
-## À faire après mise en production
+## À faire avant la mise en production
 
 - [ ] Renseigner le vrai domaine dans `APP_BASE_URL`, les identifiants SMTP et un mot de passe organisateur robuste.
 - [ ] Envoyer un email de test depuis `/admin.html` et vérifier sa réception (y compris les indésirables).

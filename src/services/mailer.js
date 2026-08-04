@@ -79,7 +79,7 @@ export async function sendReminderEmails(participants, { tripName, homeUrl }) {
 
 export async function sendTestEmail(to) {
   return sendToParticipants([{ name: 'Organisateur', email: to }], () => ({
-    subject: 'Test email — Album Voyage',
+    subject: 'Test email — La traversée des Alpes RAID 2026',
     text: "Votre configuration SMTP fonctionne. L'envoi des emails de l'album est prêt.",
     html: '<p><strong>Bonne nouvelle :</strong> votre configuration SMTP fonctionne.</p><p>L’envoi des emails de l’album est prêt.</p>',
   }));
@@ -92,7 +92,7 @@ async function sendToParticipants(participants, buildMessage) {
   }
 
   const transporter = getTransporter();
-  const fromName = (process.env.FROM_NAME || 'Album Voyage').replace(/[\r\n"]/g, '');
+  const fromName = (process.env.FROM_NAME || 'La traversée des Alpes RAID 2026').replace(/[\r\n"]/g, '');
   const from = `"${fromName}" <${status.fromEmail}>`;
   const queue = [...participants];
   const sentRecipients = [];

@@ -50,7 +50,7 @@ app.get('/download/photos.zip', (req, res) => {
 
 const PORT = Number(process.env.PORT || 3000);
 const server = app.listen(PORT, () => {
-  console.log(`Album Voyage lance sur http://localhost:${PORT}`);
+  console.log(`La traversée des Alpes RAID 2026 lancée sur http://localhost:${PORT}`);
 });
 
 function shutdown(signal) {

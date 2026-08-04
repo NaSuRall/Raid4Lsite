@@ -380,11 +380,26 @@ function buildBox(photo, pageIndex, slotIndex) {
   actions.className = 'photo-actions';
   actions.innerHTML = `
     <button type="button" class="photo-action move-prev" aria-label="Déplacer la photo vers la place précédente">←</button>
-    <button type="button" class="photo-action edit-crop">Ajuster</button>
-    <button type="button" class="photo-action free-slot" title="Créer un espace vide">Espace</button>
-    <button type="button" class="photo-action exclude-photo" title="Retirer cette photo de l’album">Retirer</button>
+    <button type="button" class="photo-action edit-crop" aria-label="Ajuster le cadrage">Ajuster</button>
+    <button type="button" class="photo-action free-slot" aria-label="Créer un espace vide" title="Créer un espace vide">Espace</button>
+    <button type="button" class="photo-action exclude-photo" aria-label="Retirer cette photo de l’album" title="Retirer cette photo de l’album">Retirer</button>
     <button type="button" class="photo-action move-next" aria-label="Déplacer la photo vers la place suivante">→</button>
+    <button type="button" class="photo-action photo-menu-toggle" aria-label="Afficher les actions de la photo" aria-expanded="false">•••</button>
   `;
+  actions.querySelector('.photo-menu-toggle').addEventListener('click', (event) => {
+    event.stopPropagation();
+    const willOpen = !actions.classList.contains('is-open');
+    document.querySelectorAll('.photo-actions.is-open').forEach((menu) => {
+      menu.classList.remove('is-open');
+      const toggle = menu.querySelector('.photo-menu-toggle');
+      toggle?.setAttribute('aria-expanded', 'false');
+      toggle?.setAttribute('aria-label', 'Afficher les actions de la photo');
+    });
+    actions.classList.toggle('is-open', willOpen);
+    const toggle = actions.querySelector('.photo-menu-toggle');
+    toggle.setAttribute('aria-expanded', String(willOpen));
+    toggle.setAttribute('aria-label', willOpen ? 'Masquer les actions de la photo' : 'Afficher les actions de la photo');
+  });
   actions.querySelector('.move-prev').addEventListener('click', (event) => {
     event.stopPropagation();
     movePhoto(photo.id, -1);

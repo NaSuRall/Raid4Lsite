@@ -22,10 +22,11 @@ const router = Router();
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PARTICIPANT_ID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ALLOWED_IMAGE_FORMATS = new Set(['jpeg', 'png', 'webp', 'heif', 'avif', 'tiff']);
+const DEFAULT_TRIP_NAME = 'La traversée des Alpes RAID 2026';
 
 // ---- config ----
 router.get('/config', (req, res) => {
-  res.json({ tripName: process.env.TRIP_NAME || 'Notre Voyage' });
+  res.json({ tripName: process.env.TRIP_NAME || DEFAULT_TRIP_NAME });
 });
 
 // ---- register ----
@@ -395,7 +396,7 @@ function getFullLayout() {
 
 // ---- admin: freeze a new random layout (shuffle + page assignment), no rendering yet ----
 router.post('/admin/prepare', async (req, res) => {
-  const title = (req.body?.title || process.env.TRIP_NAME || 'Notre Album de Voyage').trim();
+  const title = (req.body?.title || process.env.TRIP_NAME || DEFAULT_TRIP_NAME).trim();
   const coverPhotoId = req.body?.coverPhotoId || null;
 
   const photos = db.prepare('SELECT id, participant_id, filename FROM photos').all();
@@ -599,7 +600,7 @@ router.post('/admin/remind', async (req, res) => {
   }
 
   const baseUrl = process.env.APP_BASE_URL || `${req.protocol}://${req.get('host')}`;
-  const tripName = process.env.TRIP_NAME || 'Notre Voyage';
+  const tripName = process.env.TRIP_NAME || DEFAULT_TRIP_NAME;
 
   const result = await sendReminderEmails(pending, { tripName, homeUrl: `${baseUrl}/` });
   res.json(result);

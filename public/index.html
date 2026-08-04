@@ -3,53 +3,70 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Album Voyage</title>
+<title>La traversée des Alpes RAID 2026</title>
+<meta name="description" content="Partagez les photos de La traversée des Alpes RAID 2026 et participez à l’album collectif du voyage." />
 <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body>
+<body class="home-page">
 <header class="topbar">
-  <a class="brand" href="/" id="brand">Album Voyage</a>
+  <a class="brand" href="/" id="brand" data-trip-name>La traversée des Alpes RAID 2026</a>
   <nav><a href="/album.html">Voir l'album</a></nav>
 </header>
 
-<main>
-  <div class="shell">
-    <div class="steps-wrap">
-      <div class="steps-flow-label"><span class="tag tag-neutral">Pour les voyageurs</span></div>
-      <div class="steps">
-        <div class="step is-now"><div class="badge">1</div><div class="label">Vos infos</div></div>
-        <div class="step"><div class="badge">2</div><div class="label">Vos photos</div></div>
-        <div class="step"><div class="badge">3</div><div class="label">Terminé</div></div>
+<main class="home-main">
+  <div class="home-shell">
+    <section class="home-hero" aria-labelledby="home-title">
+      <img
+        class="home-hero-photo"
+        src="/images/raid-alpes-2026.jpg"
+        alt="Les véhicules du raid devant les montagnes des Alpes"
+        width="4096"
+        height="2304"
+        fetchpriority="high"
+      />
+      <div class="home-hero-content">
+        <div class="home-copy">
+          <span class="home-kicker">4L · pistes · sommets</span>
+          <h1 id="home-title" data-trip-name>La traversée des Alpes RAID 2026</h1>
+          <p>Un voyage, des équipages et des centaines de souvenirs à réunir dans un album collectif.</p>
+        </div>
+
+        <div class="home-form-card">
+          <span class="tag tag-accent">Album partagé</span>
+          <h2>Ajoutez vos souvenirs de route</h2>
+          <p class="home-form-intro">Indiquez simplement votre prénom et votre email pour déposer vos photos.</p>
+
+          <form id="register-form">
+            <div class="field">
+              <label for="name">Votre prénom</label>
+              <input class="input" type="text" id="name" name="name" placeholder="Votre prénom" required autocomplete="name" />
+            </div>
+            <div class="field">
+              <label for="email">Votre adresse email</label>
+              <input class="input" type="email" id="email" name="email" placeholder="vous@example.com" required autocomplete="email" />
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
+              Continuer vers mes photos
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
+            </button>
+            <div id="msg" aria-live="polite"></div>
+          </form>
+
+          <p class="home-continue">Déjà inscrit(e) ? <a href="/upload.html" id="continue-link">Retrouver mes photos</a></p>
+
+          <ol class="home-mini-steps" aria-label="Les trois étapes">
+            <li><span>1</span>Identifiez-vous</li>
+            <li><span>2</span>Ajoutez vos photos</li>
+            <li><span>3</span>Recevez l’album</li>
+          </ol>
+        </div>
       </div>
-    </div>
-
-    <div class="page-card">
-      <div class="hero-block"></div>
-      <p style="text-align:center;">Ajoutez vos photos à l'album du voyage <strong id="trip-name-inline">Notre Voyage</strong>.</p>
-
-      <form id="register-form">
-        <div class="field">
-          <label for="name">Votre prénom</label>
-          <input class="input" type="text" id="name" name="name" placeholder="Votre prénom" required autocomplete="name" />
-        </div>
-        <div class="field">
-          <label for="email">Votre adresse email</label>
-          <input class="input" type="email" id="email" name="email" placeholder="vous@example.com" required autocomplete="email" />
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block" id="submit-btn">
-          Continuer
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg>
-        </button>
-        <div id="msg"></div>
-      </form>
-
-      <p class="text-muted" style="text-align:center;margin-top:20px;font-size:14px;">Déjà inscrit(e) ? <a href="/upload.html" id="continue-link">Continuer vers l'upload</a></p>
-    </div>
+    </section>
   </div>
 </main>
 
-<footer>Album Voyage</footer>
+<footer data-trip-name>La traversée des Alpes RAID 2026</footer>
 
 <script src="/js/config.js"></script>
 <script src="/js/register.js"></script>

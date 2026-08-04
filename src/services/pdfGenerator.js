@@ -318,7 +318,7 @@ export async function generateAlbumPdf({ title, coverPhoto, pages, photosById, p
   });
   const statsStr = `${totalPhotos} photo${totalPhotos > 1 ? 's' : ''} • ${participantCount} participant${participantCount > 1 ? 's' : ''}`;
 
-  await drawCoverPage(doc, { title: title || 'Notre Album de Voyage', dateStr, statsStr, coverPhoto });
+  await drawCoverPage(doc, { title: title || 'La traversée des Alpes RAID 2026', dateStr, statsStr, coverPhoto });
 
   let contentPageCount = 0;
   for (const page of pages) {

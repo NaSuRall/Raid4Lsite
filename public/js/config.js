@@ -7,6 +7,8 @@
     });
     const inline = document.getElementById('trip-name-inline');
     if (inline) inline.textContent = cfg.tripName;
+    const pageTitle = document.body.dataset.pageTitle;
+    document.title = pageTitle ? `${pageTitle} | ${cfg.tripName}` : cfg.tripName;
     window.__tripName = cfg.tripName;
   } catch (e) {
     // config indisponible, on garde les valeurs par defaut affichees dans le HTML
